@@ -10,9 +10,13 @@ XBee localRadio = XBee();  // The connection for the local coordinating radio
 // XBee data codes
 const uint8_t TEMPERATURE_CODE = 1;
 const uint8_t LUMINOSITY_CODE = 2;
-const uint8_t PRESSURE_CODE = 4;
-const uint8_t HUMIDITY_CODE = 8;
-const uint8_t POWER_CODE = 16;
+const uint8_t PRESSURE_CODE = 3;
+const uint8_t HUMIDITY_CODE = 4;
+const uint8_t POWER_CODE = 5;
+const uint8_t LUX_CODE = 6;
+const uint8_t HEATING_CODE = 7;
+const uint8_t THERMOSTAT_CODE = 8;
+const uint8_t TEMP_12BYTE_CODE = 9;
 
 // Determine the maximum unsigned long
 const unsigned long MAX_LONG = ULONG_MAX;
