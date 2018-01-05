@@ -1,6 +1,7 @@
 #include <Wire.h>
 #include <XBee.h>
 #include <AltSoftSerial.h>
+#include "SparkFunTMP102.h"
 
 // XBee variables
 AltSoftSerial xbeeSerial;  // The software serial port for communicating with the Xbee (TX Pin 9, RX Pin 8)
@@ -24,12 +25,11 @@ const uint8_t BATTERY_SOC_CODE = 10;
 // Timing variables
 const unsigned long SENSOR_DELAY = 600000;  // The period between temperature measurements (ms).
 
-// Local pins
-const int LOCAL_LUMINOSITY_PIN = A0;
-const int LOCAL_POWER_PIN = A1;
+// Create the instance of the temperature sensor
+TMP102 temp_sensor(0x48);
 
-// Create the instance of the pressure sensor
-const int TempAddress = 0x48;
+// Local pins
+const int LOCAL_POWER_PIN = A0;
 
 // Union for conversion of numbers to byte arrays
 union FloatConverter {
@@ -41,7 +41,7 @@ union FloatConverter {
 void setup(){
   // Start the hardware serial port
   Serial.begin(9600);
-  Serial.println("Started Serial...");
+  Serial.println("Started Serial");
 
   // Create the software serial port and connect the XBee
   Serial.print("Starting XBee Connection...");
@@ -49,11 +49,8 @@ void setup(){
   localRadio.setSerial(xbeeSerial);
   Serial.println("FINISHED");
   
-  // Start the I2C bus
-  Wire.begin();
-  
-  // Set the pins
-//  analogReference(EXTERNAL);  // Use the 3.3V hooked up to the AREF pin
+  // Start the sensor
+  temp_sensor.begin();
 }
 
 //-------------------------------------------------------------------------
@@ -61,12 +58,12 @@ void setup(){
 void loop(){
   // Get a temperature reading
   FloatConverter Temperature;
-  Temperature.f = getTemperature();
+  Temperature.f = temp_sensor.readTempC();
   
   // Get a power reading
   FloatConverter Power;
-  int powerSignal = analogRead(LOCAL_POWER_PIN);
-  Power.f = 5.0*powerSignal/1023.0;
+  int power_signal = analogRead(LOCAL_POWER_PIN);
+  Power.f = 5.0*power_signal/1023.0;
 
   // Create the byte array to pass through the XBee
   size_t floatBytes = sizeof(float);
@@ -98,22 +95,5 @@ void loop(){
 
   // Transmission delay
   delay(SENSOR_DELAY);
-}
-
-//-------------------------------------------------------------------------
-float getTemperature(){
-  // Make the temperature sensor take a reading
-  Wire.requestFrom(TempAddress,2); 
-
-  // Read the 16-bit data
-  byte MSB = Wire.read();
-  byte LSB = Wire.read();
-
-  //it's a 12 bit int, using two's compliment for negative
-  int TemperatureSum = ((MSB << 8) | LSB) >> 4; 
-
-  // Calculate the temperature
-  float Celsius = 0.0625*TemperatureSum;
-  return Celsius;
 }
 
