@@ -39,6 +39,10 @@ union FloatConverter {
 
 //-------------------------------------------------------------------------
 void setup(){
+  // Turn off onboard LED
+  pinMode(13, OUTPUT);
+  digitalWrite(13, LOW);
+  
   // Start the hardware serial port
   Serial.begin(9600);
   Serial.println("Started Serial");
